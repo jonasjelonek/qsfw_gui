@@ -67,7 +67,7 @@ class GUI(QtWidgets.QDialog):
     
     def startCompile(self):
         filePath = os.path.join(self.currentPath, 'files/')
-        qsfwPath = os.path.join(self.currentPath, 'qsfw-main')
+        qsfwPath = os.path.join(self.currentPath, 'qsfw')
         my_os = str(sys.platform)        
            
         try:

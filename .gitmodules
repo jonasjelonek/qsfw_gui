@@ -1,0 +1,3 @@
+[submodule "qsfw"]
+	path = qsfw
+	url = https://github.com/jonasjelonek/qsfw.git
