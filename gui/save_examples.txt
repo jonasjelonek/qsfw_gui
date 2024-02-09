@@ -1,0 +1,147 @@
+def makeBoxForCircuit(self):
+        sender = self.sender()
+        sender.setEnabled(False)
+        index = self.elements.index(sender)
+        
+        valueLabel = QLabel(self)
+        valueLabel.setGeometry(sender.x, sender.y-80, 110, 20)
+        valueLabel.setText('values: ' + str(sender.info))
+        
+        numberLabel = QLabel(self)
+        numberLabel.setGeometry(sender.x, sender.y-60, 60, 20)
+        numberLabel.setText('number: ')
+        
+        numberBox = QSpinBox(self)
+        numberBox.setGeometry(numberLabel.x() + numberLabel.width(), numberLabel.y(), 50, numberLabel.height())
+        numberBox.setRange(1,5)
+        numberBox.setValue(len(sender.outputs))
+        
+        valueLabel.show()
+        numberLabel.show()
+        numberBox.show()
+        self.makeBoxForElem([valueLabel, numberLabel, numberBox])
+        
+        
+    def makeBoxForQubit(self):
+        sender = self.sender()
+        sender.setEnabled(False)
+        index = self.elements.index(sender)
+        
+        nameLabel = QLabel(self)
+        nameLabel.setGeometry(sender.x, sender.y-80, 60, 20)
+        nameLabel.setText('name: ')
+        
+        nameBox = QLineEdit(self)
+        nameBox.setGeometry(nameLabel.x() + nameLabel.width(), nameLabel.y(), 50, nameLabel.height())
+        nameBox.setText(sender.text())
+        
+        valueLabel = QLabel(self)
+        valueLabel.setGeometry(sender.x, sender.y-60, 60, 20)
+        valueLabel.setText('value: ')
+        
+        valueBox = QSpinBox(self)
+        valueBox.setGeometry(valueLabel.x() + valueLabel.width(), valueLabel.y(), 50, valueLabel.height())
+        valueBox.setRange(0,1)
+        valueBox.setValue(sender.info)
+        
+        
+        nameLabel.show()
+        nameBox.show()
+        valueLabel.show()
+        valueBox.show()
+        self.makeBoxForElem([nameLabel, nameBox, valueLabel, valueBox])
+        
+    def makeBoxForAngleFunction(self):
+        sender = self.sender()
+        sender.setEnabled(False)
+        index = self.elements.index(sender)
+        
+        angleLabel = QLabel(self)
+        angleLabel.setGeometry(sender.x, sender.y-60, 60, 20)
+        angleLabel.setText('angle: ')
+        
+        angleBox = QLineEdit(self)
+        angleBox.setGeometry(angleLabel.x() + angleLabel.width(), angleLabel.y(), 50, angleLabel.height())
+        angleBox.setText(sender.info)
+        
+        angleLabel.show()
+        angleBox.show()
+        self.makeBoxForElem([angleLabel, angleBox])
+
+
+    def makeBoxForElem(self, deleteList):
+        sender = self.sender()
+        sender.setEnabled(False)
+        index = self.elements.index(sender)
+        
+        
+        acceptLabel = QLabel(self)
+        acceptLabel.setGeometry(sender.x, sender.y-40, 80, 20)
+        acceptLabel.setText('Accept Settings: ')
+        
+        acceptButton = QPushButton('OK',self)
+        acceptButton.setObjectName('acceptButton')
+        acceptButton.setGeometry(acceptLabel.x() + acceptLabel.width(), acceptLabel.y(), 30, acceptLabel.height())
+        
+        acceptLabel.show()
+        acceptButton.show()
+        
+        deleteLabel = QLabel(self)
+        deleteLabel.setGeometry(sender.x, sender.y-20, 80, 20)
+        deleteLabel.setText('Delete Object: ')
+        
+        deleteButton = QPushButton('',self)
+        deleteButton.setObjectName('deleteButton')
+        pixmapi = QStyle.SP_DialogCancelButton
+        icon = self.style().standardIcon(pixmapi)
+        deleteButton.setIcon(icon)
+        deleteButton.setGeometry(deleteLabel.x() + deleteLabel.width(), deleteLabel.y(), 30, deleteLabel.height())
+       
+
+        deleteLabel.show()
+        deleteButton.show()
+        
+
+        deleteList += [acceptLabel, acceptButton, deleteLabel, deleteButton]
+        acceptButton.clicked.connect(lambda: self.editElement(sender,  deleteList))
+        deleteButton.clicked.connect(lambda: self.deleteElements(sender,  deleteList))
+    
+     
+        
+    def editElement(self, sender, deleteList):
+        if sender.category == "circuit":
+            sender.setPoints(delete=True)
+            try: self.deleteLinesOutputs(sender)
+            except: pass
+            sender.outputs = sender.createOutputDict(deleteList[2].value())
+            sender.update(sender.x, sender.y, sender.width, sender.height)
+            
+        
+        if sender.category == "qubit":
+            sender.name = deleteList[1].text()
+            sender.info = deleteList[3].value()
+            sender.setText(sender.name)
+        
+        if sender.category[0:-1] == "angleFunction":
+            sender.info = deleteList[1].text()
+        
+        self.deleteElements(sender, deleteList, False)
+
+    
+    def deleteElements(self, sender, deleteList, deleteAll = True):
+        sender.setEnabled(True)
+               
+        if deleteAll:
+            try: self.deleteLinesInputs(sender)
+            except: pass
+            try: self.deleteLinesOutputs(sender)
+            except: pass
+            self.elements.remove(sender)
+            sender.deletePoints()
+            self.label.update()
+            sender.deleteLater()
+        
+        for i in deleteList:
+            i.deleteLater()
+        
+        self.loadMode()
